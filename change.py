@@ -135,14 +135,14 @@ def function():
                     os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                     os.system(f'iw dev {iface} set type monitor > /dev/null 2>&1')
                     os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                    print(f'\n{iface} is successfully set in monitor mode.\nSpoodef mac: {get_interface_mac(iface)}')
+                    print(f'\n{iface} is successfully set in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}')
                     sys.exit(1)
 
                 else:
                     os.system(f'ifconfig {iface} down > /dev/null 2>&1')
                     os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                     os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                    print("\nInterface already in monitor mode.\nSpoodef mac: {get_interface_mac(iface)}")
+                    print(f'\nInterface already in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}')
                     sys.exit(1)
 
             elif mode in managed:
@@ -154,14 +154,14 @@ def function():
                     os.system(f'iw dev {iface} set type managed > /dev/null 2>&1')
                     os.system(f'ifconfig {iface} up > /dev/null 2>&1')
                     os.system(f'service NetworkManager restart > /dev/null 2>&1')
-                    print(f'\n{iface} is successfully set in managed mode.\nSpoodef mac: {get_interface_mac(iface)}')
+                    print(f'\n{iface} is successfully set in managed mode.\nSpoofed mac: {get_interface_mac(iface)}')
                     sys.exit(1)
 
                 else:
                     os.system(f'ifconfig {iface} down > /dev/null 2>&1')
                     os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                     os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                    print("\nInterface already in managed mode.\nSpoodef mac: {get_interface_mac(iface)}")
+                    print(f'\nInterface already in managed mode.\nSpoofed mac: {get_interface_mac(iface)}')
                     sys.exit(1)
 
             elif mode in spoof:
@@ -169,7 +169,7 @@ def function():
                 os.system(f'ifconfig {iface} down > /dev/null 2>&1')
                 os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                 os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                print(f"\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}")
+                print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}')
                 sys.exit(1)
 
             elif mode in status:
