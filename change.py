@@ -165,6 +165,7 @@ def function():
                     sys.exit(1)
 
             elif mode in spoof:
+                check_root()
                 os.system(f'ifconfig {iface} down > /dev/null 2>&1')
                 os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                 os.system(f'ifconfig {iface} up > /dev/null 2>&1')
