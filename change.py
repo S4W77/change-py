@@ -4,6 +4,11 @@ import os
 import sys
 import subprocess
 
+Usage = [
+    "\nUsage:",
+    "\tchange <interface> <mode>"
+]
+
 def check_root():
     if not os.geteuid() == 0:
         print("\nYou must run this script with root privileges.")
@@ -36,11 +41,11 @@ def get_interface_mode(interface):
 
 def get_interface_mac(interface):
     try:
-        output = subprocess.check_output(["ip", "link", "show", interface]).decode("utf-8")
+        output = subprocess.check_output(["macchanger", "-s", interface]).decode("utf-8")
         lines = output.split('\n')
         for line in lines:
-            if "link/ether" in line:
-                mac_address = line.split("link/ether")[1].strip().split()[0]
+            if "Current MAC:" in line:
+                mac_address = line.split("Current MAC:")[1].strip().split()[0]
                 return mac_address
         return "Not Available"
     except subprocess.CalledProcessError:
@@ -73,8 +78,8 @@ def function():
         modes = [monitor, managed, spoof, status]
 
         if len(sys.argv) > 3:
-            print("\nUsage:")
-            print("\tchange <interface> <mode>")
+            for i in Usage:
+                print(i)
             sys.exit(1)
 
         elif (sys.argv[1] in help and len(sys.argv) == 2):
@@ -109,6 +114,10 @@ def function():
                 elif idx >= 10:
                     print(f"\t[{idx}] - {interface}")
             sys.exit(1)
+        
+        elif (sys.argv[1] not in lists and len(sys.argv) == 2):
+            print("\nPlease use change /? for help.")
+            sys.exit(1)
 
         iface = sys.argv[1]
         mode = sys.argv[2].strip().lower()
@@ -121,6 +130,10 @@ def function():
             mode = sys.argv[1]
             if not check_interface_exists(iface) and any(mode in sublist for sublist in modes):
                 print(f"\nInterface '{iface}' not found.")
+                sys.exit(1)
+            else:
+                for i in Usage:
+                    print(i)
                 sys.exit(1)
 
         try:
@@ -188,7 +201,7 @@ def function():
             print(f"\nFailed to set {iface} in {mode} mode. Error: {e}.")
             sys.exit(1)
     except IndexError:
-        print("\nNo prefix was added! Use change /? for help")
+        print("\nNo Arguments were added! Use change /? for help")
         sys.exit(1)
 try:
     if __name__ == "__main__":
