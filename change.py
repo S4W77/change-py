@@ -3,6 +3,7 @@
 import os
 import sys
 import subprocess
+import random
 
 Usage = [
     "\nUsage:",
@@ -62,6 +63,50 @@ def get_interface_info(interface):
     except subprocess.CalledProcessError:
         return "Not Available"
 
+def check_wifi_connection(iface):
+    try:
+        result = subprocess.run(['iwgetid', iface], capture_output=True, text=True)
+        if result.returncode == 0:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+def spoof_ip(iface):
+    ipv4 = os.popen(f"ip -4 a show {iface} | awk '/inet / {{print $2}}'").read()
+    mask = ipv4.split("/")
+    subnet = mask[1].strip()
+    ip = mask[0].strip()
+    ip = ip.split(".")
+
+    if subnet == '24':
+        subnet = '255.255.255.0'
+        ip_lb = ip[-1]
+        ip = ip[:-1]
+        ip_b = str(random.randint(2, 254))
+        while ip_lb == ip_b:
+            ip_b = str(random.randint(2, 254))
+        ip.append(ip_b)
+        ip_sp = '.'.join(ip)
+
+    elif subnet == '16':
+        subnet = '255.255.0.0'
+        ip_1lb = ip[-1]
+        ip_2lb = ip[-2]
+        ip = ip[:-2]
+        ip_1b = str(random.randint(2, 254))
+        ip_2b = str(random.randint(2, 254))
+        while (ip_1lb == ip_1b) and (ip_2lb == ip_2b):
+            ip_1b = str(random.randint(2, 254))
+            ip_2b = str(random.randint(2, 254))
+        ip.extend([ip_2b, ip_1b])
+        ip_sp = '.'.join(ip)
+
+    os.system(f"sudo ifconfig {iface} {ip_sp} netmask {subnet}")
+    return ip_sp
+
 def function():
     try:
         file_name = os.path.basename(__file__)
@@ -88,7 +133,7 @@ def function():
             print("\tRoot permissions:")
             print("\t[01] - Monitor  (Usage: monitor)  | Switches your wireless itnerface into monitor mode")
             print("\t[02] - Managed  (Usage: managed)  | Switches your wireless interface into managed mode")
-            print("\t[03] - Spoof    (Usage: spoof)    | Spoofs your mac address")
+            print("\t[03] - Spoof    (Usage: spoof)    | Spoofs your mac address and ip address")
             print("\n\tNon-Root permissions:")
             print("\t[04] - Status    | Gives you informations about your wireless interface")
             print("\n\tExample: change <interface> --status")
@@ -116,7 +161,7 @@ def function():
             sys.exit(1)
         
         elif (sys.argv[1] not in lists and len(sys.argv) == 2):
-            print("\nPlease use change /? for help.")
+            print("\nInvalid usage. Please use '--help' to see the usage.")
             sys.exit(1)
 
         iface = sys.argv[1]
@@ -131,7 +176,7 @@ def function():
             if not check_interface_exists(iface) and any(mode in sublist for sublist in modes):
                 print(f"\nInterface '{iface}' not found.")
                 sys.exit(1)
-            else:
+            elif not check_interface_exists(iface) and any(mode in sublist for sublist in modes):
                 for i in Usage:
                     print(i)
                 sys.exit(1)
@@ -182,7 +227,12 @@ def function():
                 os.system(f'ifconfig {iface} down > /dev/null 2>&1')
                 os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                 os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}')
+                is_connected = check_wifi_connection(iface)
+                if is_connected is True:
+                    spoofed_ip = spoof_ip(iface)
+                    print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
+                elif is_connected is False:
+                    print(f"\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
                 sys.exit(1)
 
             elif mode in status:
@@ -201,7 +251,7 @@ def function():
             print(f"\nFailed to set {iface} in {mode} mode. Error: {e}.")
             sys.exit(1)
     except IndexError:
-        print("\nNo Arguments were added! Use change /? for help")
+        print("\nInvalid usage. Please use '--help' to see the usage.")
         sys.exit(1)
 try:
     if __name__ == "__main__":
