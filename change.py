@@ -5,6 +5,7 @@ import os
 import sys
 import subprocess
 import random
+import time
 
 def main_code():
 
@@ -76,12 +77,23 @@ def main_code():
         except Exception as e:
             print(f"An error occurred: {e}")
 
+    def spoof_ip(iface): 
+        def iface_state(interface):
+            try:
+                result = subprocess.run(['ip', 'link', 'show', interface], capture_output=True, text=True, check=True)
+                return 'state UP' in result.stdout
+            except subprocess.CalledProcessError as e:
+                print(f"Error: {e}")
+                return False
+        def iface_up(interface):
+            while not iface_state(interface):
+                time.sleep(1)
 
-    def spoof_ip(iface):
         ipv4 = os.popen(f"ip -4 a show {iface} | awk '/inet / {{print $2}}'").read()
         mask = ipv4.split("/")
         subnet = mask[1].strip()
         ip = mask[0].strip()
+        pr_ip = ip + "/" + subnet
         ip = ip.split(".")
 
         if subnet == '24':
@@ -107,7 +119,10 @@ def main_code():
             ip.extend([ip_2b, ip_1b])
             ip_sp = '.'.join(ip)
 
-        os.system(f"sudo ifconfig {iface} {ip_sp} netmask {subnet}")
+        os.system(f"ip addr del {pr_ip} dev {iface}")
+        iface_up(iface)
+        os.system(f"ifconfig {iface} {ip_sp} netmask {subnet}")
+        iface_up(iface)
         return ip_sp
 
     def function():
