@@ -212,25 +212,13 @@ def main_code():
                         os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                         os.system(f'iw dev {iface} set type monitor > /dev/null 2>&1')
                         os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                        is_connected = check_wifi_connection(iface)
-                        if is_connected is True:
-                            spoofed_ip = spoof_ip(iface)
-                            print(f'\n{iface} is successfully set in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
-                        elif is_connected is False:
-                            print(f"\n{iface} is successfully set in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
-                        sys.exit(1)
+                        print(f'\n{iface} is successfully set in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}')
 
                     else:
                         os.system(f'ifconfig {iface} down > /dev/null 2>&1')
                         os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                         os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                        is_connected = check_wifi_connection(iface)
-                        if is_connected is True:
-                            spoofed_ip = spoof_ip(iface)
-                            print(f'\nInterface already in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
-                        elif is_connected is False:
-                            print(f"\nInterface already in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
-                        sys.exit(1)
+                        print(f'\nInterface already in monitor mode.\nSpoofed mac: {get_interface_mac(iface)}')
 
                 elif mode in managed:
 
@@ -242,13 +230,7 @@ def main_code():
                         os.system(f'iw dev {iface} set type managed > /dev/null 2>&1')
                         os.system(f'ifconfig {iface} up > /dev/null 2>&1')
                         os.system(f'service NetworkManager restart > /dev/null 2>&1')
-                        is_connected = check_wifi_connection(iface)
-                        if is_connected is True:
-                            spoofed_ip = spoof_ip(iface)
-                            print(f'{iface} is successfully set in managed mode.\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
-                        elif is_connected is False:
-                            print(f"\n{iface} is successfully set in managed mode.\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
-                        sys.exit(1)
+                        print(f'{iface} is successfully set in managed mode.\nSpoofed mac: {get_interface_mac(iface)}')
 
                     else:
                         os.system(f'ifconfig {iface} down > /dev/null 2>&1')
@@ -259,7 +241,7 @@ def main_code():
                             spoofed_ip = spoof_ip(iface)
                             print(f'\nInterface already in managed mode.\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
                         elif is_connected is False:
-                            print(f"\nInterface already in managed mode.\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
+                            print(f"\nInterface already in managed mode.\nSpoofed mac: {get_interface_mac(iface)}")
                         sys.exit(1)
 
                 elif mode in spoof:
