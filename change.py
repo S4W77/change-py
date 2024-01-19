@@ -259,9 +259,10 @@ def main_code():
                             print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
                         elif is_connected is False:
                             print(f"\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
-                        sys.exit(1)
                     else:
                         print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}')
+
+                    sys.exit(1)
 
                 elif mode in status:
                     print("\nphy#1")
