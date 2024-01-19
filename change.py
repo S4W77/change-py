@@ -245,17 +245,23 @@ def main_code():
                         sys.exit(1)
 
                 elif mode in spoof:
+
                     check_root()
+
                     os.system(f'ifconfig {iface} down > /dev/null 2>&1')
                     os.system(f'macchanger -r {iface} > /dev/null 2>&1')
                     os.system(f'ifconfig {iface} up > /dev/null 2>&1')
-                    is_connected = check_wifi_connection(iface)
-                    if is_connected is True:
-                        spoofed_ip = spoof_ip(iface)
-                        print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
-                    elif is_connected is False:
-                        print(f"\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
-                    sys.exit(1)
+
+                    if 'Interface' in iw_output and 'managed' in iw_output:
+                        is_connected = check_wifi_connection(iface)
+                        if is_connected is True:
+                            spoofed_ip = spoof_ip(iface)
+                            print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
+                        elif is_connected is False:
+                            print(f"\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
+                        sys.exit(1)
+                    else:
+                        print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}')
 
                 elif mode in status:
                     print("\nphy#1")
