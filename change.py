@@ -77,54 +77,6 @@ def main_code():
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def spoof_ip(iface): 
-        def iface_state(interface):
-            try:
-                result = subprocess.run(['ip', 'link', 'show', interface], capture_output=True, text=True, check=True)
-                return 'state UP' in result.stdout
-            except subprocess.CalledProcessError as e:
-                print(f"Error: {e}")
-                return False
-        def iface_up(interface):
-            while not iface_state(interface):
-                time.sleep(1)
-
-        ipv4 = os.popen(f"ip -4 a show {iface} | awk '/inet / {{print $2}}'").read()
-        mask = ipv4.split("/")
-        subnet = mask[1].strip()
-        ip = mask[0].strip()
-        pr_ip = ip + "/" + subnet
-        ip = ip.split(".")
-
-        if subnet == '24':
-            subnet = '255.255.255.0'
-            ip_lb = ip[-1]
-            ip = ip[:-1]
-            ip_b = str(random.randint(2, 254))
-            while ip_lb == ip_b:
-                ip_b = str(random.randint(2, 254))
-            ip.append(ip_b)
-            ip_sp = '.'.join(ip)
-
-        elif subnet == '16':
-            subnet = '255.255.0.0'
-            ip_1lb = ip[-1]
-            ip_2lb = ip[-2]
-            ip = ip[:-2]
-            ip_1b = str(random.randint(2, 254))
-            ip_2b = str(random.randint(2, 254))
-            while (ip_1lb == ip_1b) and (ip_2lb == ip_2b):
-                ip_1b = str(random.randint(2, 254))
-                ip_2b = str(random.randint(2, 254))
-            ip.extend([ip_2b, ip_1b])
-            ip_sp = '.'.join(ip)
-
-        os.system(f"ip addr del {pr_ip} dev {iface}")
-        iface_up(iface)
-        os.system(f"ifconfig {iface} {ip_sp} netmask {subnet}")
-        iface_up(iface)
-        return ip_sp
-
     def function():
         try:
             file_name = os.path.basename(__file__)
@@ -238,10 +190,9 @@ def main_code():
                         os.system(f'ifconfig {iface} up > /dev/null 2>&1')
                         is_connected = check_wifi_connection(iface)
                         if is_connected is True:
-                            spoofed_ip = spoof_ip(iface)
-                            print(f'\nInterface already in managed mode.\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
+                            print(f'\nInterface already in managed mode.\nSpoofed mac: {get_interface_mac(iface)}')
                         elif is_connected is False:
-                            print(f"\nInterface already in managed mode.\nSpoofed mac: {get_interface_mac(iface)}")
+                            print(f"\nInterface mode: {get_interface_mode(iface)}.\nSpoofed mac: {get_interface_mac(iface)}")
                         sys.exit(1)
 
                 elif mode in spoof:
@@ -255,8 +206,7 @@ def main_code():
                     if 'Interface' in iw_output and 'managed' in iw_output:
                         is_connected = check_wifi_connection(iface)
                         if is_connected is True:
-                            spoofed_ip = spoof_ip(iface)
-                            print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nSpoofed ip: {spoofed_ip}')
+                            print(f'\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}')
                         elif is_connected is False:
                             print(f"\nInterface: {iface}\nMode: {get_interface_mode(iface)}\nSpoofed mac: {get_interface_mac(iface)}\nCouldn't find wifi connection to spoof ip on.")
                     else:
